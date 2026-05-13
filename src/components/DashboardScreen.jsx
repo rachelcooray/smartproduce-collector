@@ -99,8 +99,13 @@ export default function DashboardScreen() {
     return (
       <div className="screen">
         <header className="header">
-          <h1 className="header-title">Dashboard</h1>
-          <p className="header-sub">Keells SmartProduce</p>
+          <div className="header-inner">
+            <img src="/keells-logo.png" alt="Keells" className="header-logo" />
+            <div>
+              <h1 className="header-title">Dashboard</h1>
+              <p className="header-sub">SmartProduce Data Collector</p>
+            </div>
+          </div>
         </header>
         <div className="screen-body center">
           <span className="spinner spinner--large" />
@@ -112,8 +117,13 @@ export default function DashboardScreen() {
   return (
     <div className="screen">
       <header className="header">
-        <h1 className="header-title">Dashboard</h1>
-        <p className="header-sub">Keells SmartProduce</p>
+        <div className="header-inner">
+          <img src="/keells-logo.png" alt="Keells" className="header-logo" />
+          <div>
+            <h1 className="header-title">Dashboard</h1>
+            <p className="header-sub">SmartProduce Data Collector</p>
+          </div>
+        </div>
       </header>
 
       <div className="screen-body">

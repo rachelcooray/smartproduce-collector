@@ -3,26 +3,47 @@ import toast from 'react-hot-toast'
 import { uploadImageToCloudinary } from '../lib/cloudinary'
 import { supabase, supabaseReady } from '../lib/supabase'
 
-const PRODUCE_OPTIONS = [
-  'Gotukola', 'Mukunuwenna', 'Karapincha', 'Drumstick', 'Wood Apple',
-  'Rambutan', 'Pandan', 'Bitter Gourd', 'Snake Gourd', 'Ash Plantain',
-  'Banana', 'Mango', 'Pineapple', 'Papaya', 'Jackfruit', 'Coconut',
-  'Lime', 'Tomato', 'Carrot', 'Beetroot', 'Cabbage', 'Leeks', 'Potato',
-]
+const PRODUCE_BY_CATEGORY = {
+  vege: [
+    'Beetroot', 'Bitter Gourd', 'Brinjal', 'Cabbage', 'Carrot', 'Daikon',
+    'Drumstick', 'Garlic', 'Ginger', 'Gotukola', 'Green Chilli', 'Karapincha',
+    'Leeks', 'Mukunuwenna', 'Okra', 'Onion', 'Potato', 'Pumpkin', 'Raw Banana',
+    'Snake Gourd', 'Tomato',
+  ],
+  fruit: [
+    'Avocado', 'Banana', 'Coconut', 'Jackfruit', 'Lime', 'Mango', 'Papaya',
+    'Passion Fruit', 'Pineapple', 'Rambutan', 'Watermelon', 'Wood Apple',
+  ],
+}
+
+const VARIETIES = {
+  'Banana':     ['Kolikuttu', 'Ambun', 'Anamalu', 'Cavendish', 'Seeni', 'Pethpeli', 'Other'],
+  'Mango':      ['Karthakolomban', 'Willard', 'TJC', 'Imported', 'Other'],
+  'Tomato':     ['Local', 'Cherry', 'Imported'],
+  'Apple':      ['Fuji', 'Granny Smith', 'Pink Lady', 'Gala', 'Other'],
+  'Potato':     ['Local', 'Imported'],
+  'Onion':      ['Local Red', 'Local Small', 'Imported Big'],
+  'Cabbage':    ['Green', 'Purple', 'Cauliflower'],
+  'Pumpkin':    ['Local', 'Butternut'],
+  'Watermelon': ['Seeded', 'Seedless'],
+  'Coconut':    ['Green (King)', 'Dry'],
+  'Jackfruit':  ['Whole', 'Cut Piece'],
+  'Brinjal':    ['Purple Long', 'Round', 'Green'],
+}
 
 const BRANCHES = [
   'Colombo 3', 'Colombo 7', 'Nugegoda', 'Maharagama',
   'Kandy', 'Galle', 'Negombo', 'Kurunegala',
 ]
 
-function ProduceCombobox({ value, onChange }) {
+function ProduceCombobox({ value, onChange, options }) {
   const [query, setQuery] = useState(value || '')
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
   const filtered = query.length === 0
-    ? PRODUCE_OPTIONS
-    : PRODUCE_OPTIONS.filter(p => p.toLowerCase().includes(query.toLowerCase()))
+    ? options
+    : options.filter(p => p.toLowerCase().includes(query.toLowerCase()))
 
   useEffect(() => {
     const handler = (e) => {
@@ -37,6 +58,9 @@ function ProduceCombobox({ value, onChange }) {
     onChange(item)
     setOpen(false)
   }
+
+  // keep query in sync if value cleared externally
+  useEffect(() => { if (!value) setQuery('') }, [value])
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -63,6 +87,23 @@ function ProduceCombobox({ value, onChange }) {
           }
         </ul>
       )}
+    </div>
+  )
+}
+
+function VarietyPicker({ varieties, value, onChange }) {
+  return (
+    <div className="variety-picker">
+      {varieties.map(v => (
+        <button
+          key={v}
+          type="button"
+          className={`variety-btn ${value === v ? 'variety-btn--active' : ''}`}
+          onClick={() => onChange(v)}
+        >
+          {v}
+        </button>
+      ))}
     </div>
   )
 }
@@ -100,7 +141,10 @@ function ImageZone({ image, onImage }) {
         <img src={image.url} alt="preview" className="image-preview" />
       ) : (
         <div className="image-placeholder">
-          <span className="image-icon">📷</span>
+          <svg className="image-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
           <span className="image-label">Tap to take photo or choose image</span>
           <span className="image-sub">Required</span>
         </div>
@@ -128,7 +172,9 @@ function SegmentControl({ options, value, onChange }) {
 
 export default function UploadScreen() {
   const [image, setImage] = useState(null)
+  const [category, setCategory] = useState('vege')
   const [produceName, setProduceName] = useState('')
+  const [variety, setVariety] = useState('')
   const [presentation, setPresentation] = useState('loose')
   const [angle, setAngle] = useState('top')
   const [branch, setBranch] = useState('')
@@ -136,6 +182,20 @@ export default function UploadScreen() {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [todayCount, setTodayCount] = useState(0)
+
+  const produceOptions = PRODUCE_BY_CATEGORY[category]
+  const varieties = VARIETIES[produceName] || null
+
+  const handleCategoryChange = (cat) => {
+    setCategory(cat)
+    setProduceName('')
+    setVariety('')
+  }
+
+  const handleProduceChange = (name) => {
+    setProduceName(name)
+    setVariety('')
+  }
 
   const fetchTodayCount = async (name) => {
     if (!name || !supabaseReady) return
@@ -160,18 +220,23 @@ export default function UploadScreen() {
     e.preventDefault()
     if (!image) { toast.error('Please select an image'); return }
     if (!produceName.trim()) { toast.error('Please enter a produce name'); return }
+    if (varieties && !variety) { toast.error('Please select a variety'); return }
 
     if (!supabaseReady) {
       toast.error('Add your credentials in .env to enable submissions')
       return
     }
+
+    // variety is stored in the angle field; fall back to angle if no variety
+    const angleValue = varieties ? variety : angle
+
     setLoading(true)
     try {
       const imageUrl = await uploadImageToCloudinary(image.file)
       const { error } = await supabase.from('uploads').insert({
         item_name: produceName.trim(),
         presentation,
-        angle,
+        angle: angleValue,
         branch,
         notes: notes.trim() || null,
         image_url: imageUrl,
@@ -179,13 +244,15 @@ export default function UploadScreen() {
       })
       if (error) throw error
 
-      toast.success('Image submitted! Keep going 💪')
+      toast.success('Image submitted! Keep going.')
 
       localStorage.setItem('sp_name', uploadedBy)
       localStorage.setItem('sp_branch', branch)
 
       setImage(null)
+      setCategory('vege')
       setProduceName('')
+      setVariety('')
       setPresentation('loose')
       setAngle('top')
       setNotes('')
@@ -201,8 +268,13 @@ export default function UploadScreen() {
   return (
     <div className="screen">
       <header className="header">
-        <h1 className="header-title">Add Produce Image</h1>
-        <p className="header-sub">Keells SmartProduce</p>
+        <div className="header-inner">
+          <img src="/keells-logo.png" alt="Keells" className="header-logo" />
+          <div>
+            <h1 className="header-title">Add Produce Image</h1>
+            <p className="header-sub">SmartProduce Data Collector</p>
+          </div>
+        </div>
       </header>
 
       <div className="screen-body">
@@ -215,8 +287,30 @@ export default function UploadScreen() {
           <ImageZone image={image} onImage={setImage} />
 
           <div className="field">
+            <label className="field-label">Category</label>
+            <SegmentControl
+              options={[{ value: 'vege', label: 'Vegetable' }, { value: 'fruit', label: 'Fruit' }]}
+              value={category}
+              onChange={handleCategoryChange}
+            />
+          </div>
+
+          <div className="field">
             <label className="field-label">Produce Name <span className="required">*</span></label>
-            <ProduceCombobox value={produceName} onChange={setProduceName} />
+            <ProduceCombobox value={produceName} onChange={handleProduceChange} options={produceOptions} />
+
+            {varieties && (
+              <div className="field" style={{ marginTop: 8 }}>
+                <label className="field-label">
+                  Variety <span className="required">*</span>
+                </label>
+                <VarietyPicker
+                  varieties={varieties}
+                  value={variety}
+                  onChange={setVariety}
+                />
+              </div>
+            )}
           </div>
 
           <div className="field">
@@ -228,18 +322,20 @@ export default function UploadScreen() {
             />
           </div>
 
-          <div className="field">
-            <label className="field-label">Angle</label>
-            <SegmentControl
-              options={[
-                { value: 'top', label: 'Top' },
-                { value: 'side', label: 'Side' },
-                { value: '45deg', label: '45°' },
-              ]}
-              value={angle}
-              onChange={setAngle}
-            />
-          </div>
+          {!varieties && (
+            <div className="field">
+              <label className="field-label">Angle</label>
+              <SegmentControl
+                options={[
+                  { value: 'top', label: 'Top' },
+                  { value: 'side', label: 'Side' },
+                  { value: '45deg', label: '45°' },
+                ]}
+                value={angle}
+                onChange={setAngle}
+              />
+            </div>
+          )}
 
           <div className="field">
             <label className="field-label">Branch</label>

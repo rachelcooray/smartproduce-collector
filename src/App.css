@@ -30,6 +30,19 @@
   z-index: 10;
 }
 
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
 .header-title {
   font-size: 18px;
   font-weight: 700;
@@ -197,6 +210,30 @@
   color: #fff;
 }
 
+/* ─── Variety Picker ─────────────────────────────────── */
+.variety-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.variety-btn {
+  padding: 8px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: #fff;
+  color: var(--gray-700);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.variety-btn--active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
 /* ─── Image Zone ─────────────────────────────────────── */
 .image-zone {
   width: 100%;
@@ -231,7 +268,9 @@
 }
 
 .image-icon {
-  font-size: 40px;
+  width: 44px;
+  height: 44px;
+  color: var(--gray-400);
 }
 
 .image-label {
