@@ -232,7 +232,13 @@ export default function UploadScreen() {
 
     setLoading(true)
     try {
-      const imageUrl = await uploadImageToCloudinary(image.file)
+      let imageUrl
+      try {
+        imageUrl = await uploadImageToCloudinary(image.file)
+      } catch (err) {
+        throw new Error('Image upload failed. Check Cloudinary credentials in Vercel settings.')
+      }
+
       const { error } = await supabase.from('uploads').insert({
         item_name: produceName.trim(),
         presentation,
@@ -242,7 +248,7 @@ export default function UploadScreen() {
         image_url: imageUrl,
         uploaded_by: uploadedBy.trim() || null,
       })
-      if (error) throw error
+      if (error) throw new Error('Database save failed: ' + error.message)
 
       toast.success('Image submitted! Keep going.')
 
