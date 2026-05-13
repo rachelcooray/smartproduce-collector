@@ -1,0 +1,505 @@
+/* ─── Layout ──────────────────────────────────────────── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--gray-100);
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Screen / Header ─────────────────────────────────── */
+.screen {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: var(--green);
+  color: #fff;
+  padding: 16px 20px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.header-sub {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.screen-body {
+  flex: 1;
+  padding: 16px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.screen-body.center {
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Card ───────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin-bottom: 12px;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* ─── Form ───────────────────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.field-optional {
+  font-weight: 400;
+  color: var(--gray-400);
+}
+
+.required {
+  color: var(--red);
+}
+
+.field-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fff;
+  color: var(--gray-900);
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+
+.field-input:focus {
+  border-color: var(--green);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* ─── Combobox ───────────────────────────────────────── */
+.combo-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  list-style: none;
+  padding: 4px 0;
+}
+
+.combo-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--gray-900);
+}
+
+.combo-item:hover, .combo-item:active {
+  background: var(--green-light);
+  color: var(--green);
+}
+
+.combo-custom {
+  color: var(--green);
+  font-style: italic;
+}
+
+/* ─── Segment Control ────────────────────────────────── */
+.segment {
+  display: flex;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--gray-100);
+}
+
+.segment-btn {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  color: var(--gray-600);
+  border-right: 1px solid var(--gray-200);
+  transition: background 0.15s, color 0.15s;
+}
+
+.segment-btn:last-child {
+  border-right: none;
+}
+
+.segment-btn--active {
+  background: var(--green);
+  color: #fff;
+}
+
+/* ─── Image Zone ─────────────────────────────────────── */
+.image-zone {
+  width: 100%;
+  min-height: 180px;
+  border: 2px dashed var(--gray-200);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.image-zone:active {
+  border-color: var(--green);
+}
+
+.image-zone--filled {
+  border-style: solid;
+  border-color: var(--green);
+  min-height: 220px;
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px;
+}
+
+.image-icon {
+  font-size: 40px;
+}
+
+.image-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  text-align: center;
+}
+
+.image-sub {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-height: 280px;
+}
+
+/* ─── Submit button ──────────────────────────────────── */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.15s;
+  min-height: 52px;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.today-count {
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-600);
+  padding-bottom: 8px;
+}
+
+/* ─── Spinner ────────────────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+.spinner--large {
+  width: 36px;
+  height: 36px;
+  border-color: var(--gray-200);
+  border-top-color: var(--green);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Bottom Nav ─────────────────────────────────────── */
+.bottom-nav {
+  display: flex;
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px 12px;
+  background: none;
+  border: none;
+  gap: 3px;
+  transition: color 0.15s;
+  color: var(--gray-400);
+}
+
+.nav-btn--active {
+  color: var(--green);
+}
+
+.nav-icon {
+  font-size: 22px;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Dashboard ──────────────────────────────────────── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.metric-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* ─── Coverage bars ──────────────────────────────────── */
+.coverage-row {
+  margin-bottom: 10px;
+}
+
+.coverage-row:last-child {
+  margin-bottom: 0;
+}
+
+.coverage-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.coverage-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.coverage-count {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.coverage-track {
+  width: 100%;
+  height: 8px;
+  background: var(--gray-100);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.coverage-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* ─── Table ──────────────────────────────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray-400);
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-700);
+  vertical-align: top;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.time-cell {
+  color: var(--gray-400);
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+/* ─── Export button ──────────────────────────────────── */
+.export-btn {
+  padding: 6px 14px;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  transition: background 0.15s;
+}
+
+.export-btn:hover {
+  background: #c5e8d4;
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Setup banner ───────────────────────────────────── */
+.setup-banner {
+  background: #fff8e1;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #92400e;
+}
+
+.setup-banner code {
+  font-family: monospace;
+  background: #fef3c7;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ─── Empty state ────────────────────────────────────── */
+.empty {
+  text-align: center;
+  color: var(--gray-400);
+  font-size: 14px;
+  padding: 20px 0;
+}
