@@ -13,13 +13,13 @@ function MetricCard({ label, value }) {
   )
 }
 
-function CoverageBar({ item, count }) {
+function CoverageBar({ category, count }) {
   const pct = Math.min((count / TARGET) * 100, 100)
   const color = count >= 500 ? 'var(--green)' : count >= 200 ? 'var(--amber)' : 'var(--red)'
   return (
     <div className="coverage-row">
       <div className="coverage-info">
-        <span className="coverage-name">{item}</span>
+        <span className="coverage-name">{category}</span>
         <span className="coverage-count" style={{ color }}>{count} / {TARGET}</span>
       </div>
       <div className="coverage-track">
@@ -30,7 +30,7 @@ function CoverageBar({ item, count }) {
 }
 
 function exportCSV(rows) {
-  const headers = ['id', 'created_at', 'item_name', 'presentation', 'angle', 'branch', 'uploaded_by', 'notes', 'image_url']
+  const headers = ['id', 'created_at', 'item_name', 'category', 'presentation', 'angle', 'branch', 'uploaded_by', 'notes', 'image_url']
   const csv = [
     headers.join(','),
     ...rows.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(',')),
@@ -46,13 +46,14 @@ function exportCSV(rows) {
 
 export default function DashboardScreen() {
   const [metrics, setMetrics] = useState({})
-  const [coverage, setCoverage] = useState([])
+  const [categoryCoverage, setCategoryCoverage] = useState([])
   const [recent, setRecent] = useState([])
   const [allRows, setAllRows] = useState([])
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
     if (!supabaseReady) { setLoading(false); return }
+
     const weekAgo = new Date()
     weekAgo.setDate(weekAgo.getDate() - 7)
 
@@ -70,22 +71,26 @@ export default function DashboardScreen() {
     setAllRows(rows)
     setRecent(rows.slice(0, 20))
 
-    const names = new Set(rows.map(r => r.item_name))
+    const categories = new Set(rows.map(r => r.category || r.item_name).filter(Boolean))
     const branches = new Set(rows.map(r => r.branch).filter(Boolean))
 
     setMetrics({
       total: total || 0,
-      produceTypes: names.size,
+      categories: categories.size,
       branchesActive: branches.size,
       thisWeek: thisWeek || 0,
     })
 
+    // Group by category (fall back to item_name for older rows without category)
     const counts = {}
-    rows.forEach(r => { counts[r.item_name] = (counts[r.item_name] || 0) + 1 })
+    rows.forEach(r => {
+      const cat = r.category || r.item_name
+      if (cat) counts[cat] = (counts[cat] || 0) + 1
+    })
     const sorted = Object.entries(counts)
-      .map(([item, count]) => ({ item, count }))
+      .map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count)
-    setCoverage(sorted)
+    setCategoryCoverage(sorted)
     setLoading(false)
   }, [])
 
@@ -95,18 +100,22 @@ export default function DashboardScreen() {
     return () => clearInterval(interval)
   }, [fetchData])
 
+  const header = (
+    <header className="header">
+      <div className="header-inner">
+        <img src="/keells-logo.png" alt="SmartProduce" className="header-logo" />
+        <div>
+          <h1 className="header-title">Dashboard</h1>
+          <p className="header-sub">SmartProduce Data Collector</p>
+        </div>
+      </div>
+    </header>
+  )
+
   if (loading) {
     return (
       <div className="screen">
-        <header className="header">
-          <div className="header-inner">
-            <img src="/keells-logo.png" alt="Keells" className="header-logo" />
-            <div>
-              <h1 className="header-title">Dashboard</h1>
-              <p className="header-sub">SmartProduce Data Collector</p>
-            </div>
-          </div>
-        </header>
+        {header}
         <div className="screen-body center">
           <span className="spinner spinner--large" />
         </div>
@@ -116,36 +125,28 @@ export default function DashboardScreen() {
 
   return (
     <div className="screen">
-      <header className="header">
-        <div className="header-inner">
-          <img src="/keells-logo.png" alt="Keells" className="header-logo" />
-          <div>
-            <h1 className="header-title">Dashboard</h1>
-            <p className="header-sub">SmartProduce Data Collector</p>
-          </div>
-        </div>
-      </header>
-
+      {header}
       <div className="screen-body">
         {!supabaseReady && (
           <div className="setup-banner">
             Add your <code>.env</code> credentials to load live data
           </div>
         )}
+
         <div className="metrics-grid">
           <MetricCard label="Total Images" value={metrics.total} />
-          <MetricCard label="Produce Types" value={metrics.produceTypes} />
+          <MetricCard label="Categories" value={metrics.categories} />
           <MetricCard label="Branches Active" value={metrics.branchesActive} />
           <MetricCard label="This Week" value={metrics.thisWeek} />
         </div>
 
         <div className="card">
-          <h2 className="card-title">Coverage by Produce</h2>
-          <p className="card-sub">Target: {TARGET} images per item</p>
-          {coverage.length === 0
+          <h2 className="card-title">Coverage by Category</h2>
+          <p className="card-sub">Target: {TARGET} images per category</p>
+          {categoryCoverage.length === 0
             ? <p className="empty">No data yet</p>
-            : coverage.map(({ item, count }) => (
-              <CoverageBar key={item} item={item} count={count} />
+            : categoryCoverage.map(({ category, count }) => (
+              <CoverageBar key={category} category={category} count={count} />
             ))
           }
         </div>
@@ -166,9 +167,9 @@ export default function DashboardScreen() {
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th>Branch</th>
-                  <th>Angle</th>
+                  <th>Category</th>
                   <th>Pres.</th>
+                  <th>Branch</th>
                   <th>By</th>
                   <th>When</th>
                 </tr>
@@ -179,9 +180,11 @@ export default function DashboardScreen() {
                 ) : recent.map(r => (
                   <tr key={r.id}>
                     <td>{r.item_name}</td>
+                    <td>{r.category || '—'}</td>
+                    <td className={`pres-badge pres-badge--${r.presentation}`}>
+                      {r.presentation || '—'}
+                    </td>
                     <td>{r.branch || '—'}</td>
-                    <td>{r.angle || '—'}</td>
-                    <td>{r.presentation || '—'}</td>
                     <td>{r.uploaded_by || '—'}</td>
                     <td className="time-cell">
                       {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
